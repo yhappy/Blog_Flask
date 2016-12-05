@@ -1,13 +1,29 @@
+from flask import jsonify, request, current_app, url_for
+from . import api
+from ..models import User, Post
 
 
-@api.route('/post/')
-@auth.login_required
+@api.route('/posts/')
 def get_posts():
-    posts = Post.query.all()
-    return jsonify({ 'posts': [post.to_json() for post in posts] })
+    page = request.args.get('page', 1, type=int)
+    pagination = Post.query.paginate(page,
+                                     per_page=current_app.config['FLASK_POSTS_PER_PAGE'],
+                                     error_out=False)
+    posts = pagination.items
+    prev = None
+    if pagination.has_prev:
+        prev = url_for('api.get_posts', page=page - 1, _external=True)
+    next = None
+    if pagination.has_next:
+        next = url_for('api.get_posts', page=page + 1, _external=True)
+    return jsonify({
+        'posts': [post.to_json() for post in posts],
+        'prev': prev,
+        'next': next,
+        'count': pagination.total
+    })
 
 @api.route('/posts/<int:id>')
-@auth.login_required
 def get_post(id):
     post = Post.query.get_or_404(id)
     return jsonify(post.to_json())

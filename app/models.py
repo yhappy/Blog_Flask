@@ -281,8 +281,7 @@ class User(UserMixin, db.Model):
                 db.session.rollback()
 
     def generate_auth_token(self, expiration):
-        s = Serializer(current_app.config['SECRET_KEY'],
-                       exires_in=exiration)
+        s = Serializer(current_app.config['SECRET_KEY'], expiration)
         return s.dumps({'id': self.id})
 
     @staticmethod
@@ -297,7 +296,7 @@ class User(UserMixin, db.Model):
     def to_json(self):
         json_user = {
             'url': url_for('api.get_post', id=self.id, _external=True),
-            'username': self.member_since,
+            'username': self.username,
             'last_seen': self.last_seen,
             'post': url_for('api.get_user_posts', id=self.id, _external=True),
             'followed_posts': url_for('api.get_user_followed_posts', id=self.id, _external=True),

@@ -15,6 +15,7 @@ class Config:
     FLASKY_MAIL_SENDER = 'Flasky Admin <flasky@example.com>'
     FLASKY_ADMIN = 'admin@admin.com'
     FLASKY_POSTS_PER_PAGE = 10
+    FLASKY_USERS_PER_PAGE = 10
     FLASKY_FOLLOWERS_PER_PAGE = 10
     FLASKY_COMMENTS_PER_PAGE = 10
     HOST = '0.0.0.0'

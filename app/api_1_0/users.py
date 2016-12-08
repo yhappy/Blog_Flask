@@ -3,10 +3,32 @@ from . import api
 from ..models import User, Post
 
 
+@api.route('/users/')
+def get_users():
+    page = request.args.get('page', 1, type=int)
+    pagination = User.query.paginate(page,
+                                     per_page=current_app.config['FLASKY_USERS_PER_PAGE'],
+                                     error_out=False)
+    users = pagination.items
+    prev = None
+    if pagination.has_prev:
+        prev = url_for('api.get_users', page=page - 1, _external=True)
+    next = None
+    if pagination.has_next:
+        next = url_for('api.get_users', page=page + 1, _external=True)
+    return jsonify({
+        'users': [user.to_json() for user in users],
+        'prev': prev,
+        'next': next,
+        'count': pagination.total
+    })
+
+
 @api.route('/users/<int:id>')
 def get_user(id):
     user = User.query.get_or_404(id)
     return jsonify(user.to_json())
+
 
 @api.route('/users/<int:id>/posts/')
 def get_user_posts(id):
@@ -29,12 +51,13 @@ def get_user_posts(id):
         'count': pagination.total
     })
 
-api.route('/users/<int:id>/timeline/')
+
+@api.route('/users/<int:id>/timeline/')
 def get_user_followed_posts(id):
     user = User.query.get_or_404(id)
     page = request.args.get('page', 1, type=int)
     pagination = user.followed_posts.order_by(Post.timestamp.desc()).paginate(page,
-                                                                             per_page=current_app.config['FLASKY_POST_PER_PAGE'],
+                                                                             per_page=current_app.config['FLASKY_POSTS_PER_PAGE'],
                                                                              error_out=False)
     posts = pagination.items
     prev = None
